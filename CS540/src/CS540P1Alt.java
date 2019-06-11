@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 	
 public class CS540P1Alt {
@@ -88,5 +89,16 @@ public class CS540P1Alt {
 	        
 		 	// Prep CSV
 	        List<List<Double>> trainingData = prepareFiles(trainFile);
-	        List<List<Double>> test_records = prepareFiles(Testing_Path);
+	        
+	        // Prep Randoms
+        	Random rand = new Random();
+        	Double bias = rand.nextDouble();
+	        
+	        for(int i = 0; i < testFiles.length; i++) {
+	        	List<List<Double>> testingFiles = prepareFiles(testFiles[i]);
+	        	
+
+	        	
+	        }
+	 }
 }
