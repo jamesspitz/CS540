@@ -26,12 +26,12 @@ public class NeuralNetwork {
     static Double curr_c = 0.0;
     static Random rng = new Random();
     static int m = height * width; // hard-coded
-    static Double[][] w_1 = new Double[m][m];
-    static Double[] w_2 = new Double[m];
-    static Double[] b_1 = new Double[m];
-    static Double b_2 = rng.nextDouble() - rng.nextDouble();
-    static Double[] a_1 = new Double[m];
-    static Double a_2 = null;
+    static Double[][] w1 = new Double[m][m];
+    static Double[] w2 = new Double[m];
+    static Double[] b1 = new Double[m];
+    static Double b2 = rng.nextDouble() - rng.nextDouble();
+    static Double[] a1 = new Double[m];
+    static Double a2 = null;
 
 	
 
@@ -45,9 +45,9 @@ public class NeuralNetwork {
         List<List<Double>> test_records = prepFiles(PATH_TO_TEST);
         
         for (int i = 0; i < m; i++) {
-            w_2[i] = rng.nextDouble() - rng.nextDouble();
-            b_1[i] = rng.nextDouble() - rng.nextDouble();
-            for (int j = 0; j < w_1.length; j++) w_1[i][j] = rng.nextDouble() - rng.nextDouble();
+            w2[i] = rng.nextDouble() - rng.nextDouble();
+            b1[i] = rng.nextDouble() - rng.nextDouble();
+            for (int j = 0; j < w1.length; j++) w1[i][j] = rng.nextDouble() - rng.nextDouble();
         }
             
         for (int num_epochs = 1; ; num_epochs++) {
@@ -95,13 +95,13 @@ public class NeuralNetwork {
 
                 // Update weights & biases
                 for (int j = 0; j < m; j++) {
-                    w_2[j] -= ALPHA * 0; // TODO: update w_2 array; currently hard-code it to zero
-                    b_1[j] -= ALPHA * 0; // TODO: update b_1 array; currently hard-code it to zero
+                    w2[j] -= ALPHA * 0; // TODO: update w_2 array; currently hard-code it to zero
+                    b1[j] -= ALPHA * 0; // TODO: update b_1 array; currently hard-code it to zero
                     for (int j_prime = 0; j_prime < m; j_prime++) {
-                        w_1[j][j_prime] -= ALPHA * 0; // TODO: update w_1 2D array; currently hard-code it to zero
+                        w1[j][j_prime] -= ALPHA * 0; // TODO: update w_1 2D array; currently hard-code it to zero
                     }
                 }
-                b_2 -= ALPHA * 0; // TODO: update b_2; currently hard-code it to zero
+                b2 -= ALPHA * 0; // TODO: update b_2; currently hard-code it to zero
             }   
             
             // Calculate cost function & inference after each epoch (just to show progress)
@@ -109,7 +109,7 @@ public class NeuralNetwork {
             curr_c = 0.0;
             for (int i = 0; i < records.size(); i++) {
                 ForwardProp(records, i);
-                curr_c += Math.pow((records.get(i).get(0) - a_2), 2);           
+                curr_c += Math.pow((records.get(i).get(0) - a2), 2);           
             }
             curr_c = 0.5 * curr_c;
             
@@ -117,8 +117,8 @@ public class NeuralNetwork {
             for (int i = 0; i < test_records.size(); i++) {
                 ForwardProp(test_records, i);
 
-                if (a_2 >= 0.5 && test_records.get(i).get(0) == 1.0) num_correct++;
-                else if (a_2 < 0.5 && test_records.get(i).get(0) == 0.0) num_correct++;
+                if (a2 >= 0.5 && test_records.get(i).get(0) == 1.0) num_correct++;
+                else if (a2 < 0.5 && test_records.get(i).get(0) == 0.0) num_correct++;
             }
             System.out.println("Epoch #" + num_epochs + "=> C: " + curr_c + " Accuracy: " + num_correct/test_records.size());           
             
@@ -136,31 +136,32 @@ public class NeuralNetwork {
         for (int i = 0; i < test_records.size(); i++) {
             ForwardProp(test_records, i);
 
-            if (a_2 >= 0.5 && test_records.get(i).get(0) == 1.0) num_correct++;
-            else if (a_2 < 0.5 && test_records.get(i).get(0) == 0.0) num_correct++;
+            if (a2 >= 0.5 && test_records.get(i).get(0) == 1.0) num_correct++;
+            else if (a2 < 0.5 && test_records.get(i).get(0) == 0.0) num_correct++;
 
-            if (a_2 < 0.5) System.out.print("Predicted: 0, ");
+            if (a2 < 0.5) System.out.print("Predicted: 0, ");
             else System.out.print("Predicted: 1, ");
-            System.out.println("Actual: " + test_records.get(i).get(0) + " a_2: " + a_2);
+            System.out.println("Actual: " + test_records.get(i).get(0) + " a_2: " + a2);
         }
         System.out.println("Accuracy: " + num_correct/test_records.size());
     }
     
-    /* Calculate a_i arrays */
+    // Calculate Aij Array
     private static void ForwardProp(List<List<Double>> records, int curr_index) {
         for (int i = 0; i < m; i++) {
             double sumWx = 0;
             for (int j = 0; j < m; j++) {
-                sumWx += w_1[i][j] * records.get(curr_index).get(j+1);
+                sumWx += w1[i][j] * records.get(curr_index).get(j+1);
             }
-            a_1[i] = 0.0; // TODO: update a_1 array; currently hard-code it to zero
+            a1[i] = 1.0 / (1 + Math.exp(-1 * (sumWx + b1[i])));
         }
 
+        // Calculate Ai array
         double sumAw = 0;
         for (int j = 0; j < m; j++) {
-            sumAw += a_1[j] * w_2[j];
+            sumAw += a1[j] * w2[j];
         }
-        a_2 = 0.0; // TODO: update a_2 array; currently hard-code it to zero
+        a2 = 1.0 / (1 + Math.exp(-1 * (sumAw + b2)));
     }
     
     // Process CSV
