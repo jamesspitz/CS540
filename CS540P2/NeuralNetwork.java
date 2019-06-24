@@ -13,11 +13,12 @@ public class NeuralNetwork {
     private static final String DIR_PATH = "./FEI";
     private static final String WRITE_TO_PATH = "./output.csv";
     private static final String PATH_TO_TEST = "./test.csv";
-    private static final String COMMA_DELIMITER = ",";
     private static final Double ALPHA = 0.0;
     private static final int MAX_EPOCHS = 0;
     private static final double EPSILON = 0;
-    static int height = 36; // resizing dimension
+    
+    // Recommended resizing
+    static int height = 36;
     static int width = 26;
     
     // Initialize weight matrices & bias vectors & costs
@@ -35,13 +36,13 @@ public class NeuralNetwork {
 	
 
 	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
+		
 		Preprocessor pp = new Preprocessor(height, width);
         pp.convert_to_cvs(DIR_PATH, WRITE_TO_PATH);
         
         // Parse csv files
-        List<List<Double>> records = parseRecords(WRITE_TO_PATH);
-        List<List<Double>> test_records = parseRecords(PATH_TO_TEST);
+        List<List<Double>> records = prepFiles(WRITE_TO_PATH);
+        List<List<Double>> test_records = prepFiles(PATH_TO_TEST);
         
         for (int i = 0; i < m; i++) {
             w_2[i] = rng.nextDouble() - rng.nextDouble();
@@ -53,25 +54,39 @@ public class NeuralNetwork {
             // Alternative to the random permutation by uniformly picking an integer between 0 and n-1 from the training set
             // Note that you might want to try Knuth/Fisher-Yates shuffles approaches
             rng = new Random(); // init empty seed each epochs for randomness
+            /*int randomArray = records.size();
+            shuffleFY(records);*/
             
-            for (int itr = 0; itr < records.size(); itr++) { // each epoch has # of iterations equals # training instances
-                int random_sample_index = rng.nextInt(records.size());
-
-                // Forward propagation
-                // Calculate a_1 & a_2 of the current instance
-                ForwardProp(records, random_sample_index);
+            // Creates an index array for the training set and use Fisher-Yates to shuffle the indices
+            int[] randomArray = null;
+            for(int i = 0; i < records.size() -1; i++) {
+            	randomArray[i] = i;
+            }
+            shuffleFY(randomArray);
+            
+            
+            
+            for (int recItr = 0; recItr < records.size(); recItr++) { // each epoch has # of iterations equals # training instances
+                
+            	// Calculate a_1 & a_2 of the current instance
+            	int i = recItr;
+                ForwardProp(records, randomArray[i]);
 
                 // Back propagation
-                Double dc_db2 = 0.0; // TODO: update dc_db2; currently hard-code it to zero
+                Double dcDb2 = 0.0; // TODO: update dc_db2; currently hard-code it to zero
                 Double[] dc_dw2j = new Double[m];
+                
                 for (int j = 0; j < dc_dw2j.length; j++) {
                     dc_dw2j[j] = 0.0; // TODO: update dc_dw2j array; currently hard-code it to zero
                 }   
+                
                 Double[] dc_db1j = new Double[m];
+                
                 for (int j = 0; j < dc_db1j.length; j++) {
                     dc_db1j[j] = 0.0; // TODO: update dc_db1j array; currently hard-code it to zero
                 }   
                 Double[][] dc_dw1j = new Double[m][m];
+                
                 for (int j = 0; j < m; j++) { // hard-coded size m
                     for (int j_prime = 0; j_prime < m; j_prime++) {
                         dc_dw1j[j][j_prime] = 0.0; // TODO: update dc_dw1j 2D array; currently hard-code it to zero
@@ -134,27 +149,27 @@ public class NeuralNetwork {
     /* Calculate a_i arrays */
     private static void ForwardProp(List<List<Double>> records, int curr_index) {
         for (int i = 0; i < m; i++) {
-            double sum_wx = 0;
+            double sumWx = 0;
             for (int j = 0; j < m; j++) {
-                sum_wx += w_1[i][j] * records.get(curr_index).get(j+1);
+                sumWx += w_1[i][j] * records.get(curr_index).get(j+1);
             }
             a_1[i] = 0.0; // TODO: update a_1 array; currently hard-code it to zero
         }
 
-        double sum_aw = 0;
+        double sumAw = 0;
         for (int j = 0; j < m; j++) {
-            sum_aw += a_1[j] * w_2[j];
+            sumAw += a_1[j] * w_2[j];
         }
         a_2 = 0.0; // TODO: update a_2 array; currently hard-code it to zero
     }
     
-    /* Parse csv file */
-    public static List<List<Double>> parseRecords(String file_path) throws FileNotFoundException, IOException {
+    // Process CSV
+    public static List<List<Double>> prepFiles(String file_path) throws FileNotFoundException, IOException {
         List<List<Double>> records = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(file_path))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] string_values = line.split(COMMA_DELIMITER);
+                String[] string_values = line.split(",");
                 Double[] double_values = new Double[string_values.length];
                 double_values[0] = Double.parseDouble(string_values[0]); // label
                 for (int i = 1; i < string_values.length; i++) {
@@ -164,7 +179,24 @@ public class NeuralNetwork {
             }
         }
         return records;
-
-
-}
+    }
+    
+    // Fisher-Yates Algo
+    public static int[] shuffleFY(int[] intArray) {
+    	Random rand = new Random();
+        for (int i = intArray.length - 1; i > 0; i--)
+        {
+        	// Swap
+			int index = rand.nextInt(i + 1);
+			int num = intArray[index];
+			intArray[index] = intArray[i];
+			intArray[i] = num;       
+        }
+        return intArray;
+      }
+    
+    
+    
+    
+    
 }
