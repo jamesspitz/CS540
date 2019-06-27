@@ -13,7 +13,7 @@ public class NeuralNetwork {
     private static final String DIR_PATH = "./FEI";
     private static final String WRITE_TO_PATH = "./output.csv";
     private static final String PATH_TO_TEST = "./test.csv";
-    private static final Double ALPHA = 0.0;
+    private static final Double learningRate = 0.0;
     private static final int MAX_EPOCHS = 0;
     private static final double EPSILON = 0;
     
@@ -53,7 +53,9 @@ public class NeuralNetwork {
         for (int num_epochs = 1; ; num_epochs++) {
             // Alternative to the random permutation by uniformly picking an integer between 0 and n-1 from the training set
             // Note that you might want to try Knuth/Fisher-Yates shuffles approaches
-            rng = new Random(); // init empty seed each epochs for randomness
+        	
+            rng = new Random(); // new random to create index array for F-Y algo.
+            
             /*int randomArray = records.size();
             shuffleFY(records);*/
             
@@ -71,13 +73,16 @@ public class NeuralNetwork {
             	// Calculate a_1 & a_2 of the current instance
             	int i = recItr;
                 ForwardProp(records, randomArray[i]);
+                
+                // Index value
+                double y = records.get(i).get(0);
 
                 // Back propagation
-                Double dcDb2 = 0.0; // TODO: update dc_db2; currently hard-code it to zero
+                Double dcDb2 = (a2 - y)*a2 * (1-a2);  // Update dbdc
                 Double[] dc_dw2j = new Double[m];
                 
                 for (int j = 0; j < dc_dw2j.length; j++) {
-                    dc_dw2j[j] = 0.0; // TODO: update dc_dw2j array; currently hard-code it to zero
+                    dc_dw2j[j] = dcDb2 * a1[j]; // TODO: update dc_dw2j array; currently hard-code it to zero
                 }   
                 
                 Double[] dc_db1j = new Double[m];
@@ -95,13 +100,13 @@ public class NeuralNetwork {
 
                 // Update weights & biases
                 for (int j = 0; j < m; j++) {
-                    w2[j] -= ALPHA * 0; // TODO: update w_2 array; currently hard-code it to zero
-                    b1[j] -= ALPHA * 0; // TODO: update b_1 array; currently hard-code it to zero
+                    w2[j] -= learningRate * 0; // TODO: update w_2 array; currently hard-code it to zero
+                    b1[j] -= learningRate * 0; // TODO: update b_1 array; currently hard-code it to zero
                     for (int j_prime = 0; j_prime < m; j_prime++) {
-                        w1[j][j_prime] -= ALPHA * 0; // TODO: update w_1 2D array; currently hard-code it to zero
+                        w1[j][j_prime] -= learningRate * 0; // TODO: update w_1 2D array; currently hard-code it to zero
                     }
                 }
-                b2 -= ALPHA * 0; // TODO: update b_2; currently hard-code it to zero
+                b2 -= learningRate * 0; // TODO: update b_2; currently hard-code it to zero
             }   
             
             // Calculate cost function & inference after each epoch (just to show progress)
@@ -125,8 +130,7 @@ public class NeuralNetwork {
             // Check for convergence
             if (Math.abs(curr_c - prev_c) < EPSILON) break;
             else if (num_epochs >= MAX_EPOCHS) { // termination condition
-                System.out.println("Reached the maximum number of num_epochs. "
-                        + "Maybe try a different learning rate?");
+                System.out.println("Reached limit of iterations!  ");
                 break;
             }
         }
