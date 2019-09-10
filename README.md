@@ -1,1 +1,1 @@
-# Cs540 Introduction to AI
+# CS540: Introduction to AI
