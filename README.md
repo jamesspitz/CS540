@@ -1,1 +1,1 @@
-# Cs540
+# Cs540 Introduction to AI
